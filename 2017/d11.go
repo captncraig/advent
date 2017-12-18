@@ -34,11 +34,55 @@ se,sw,se,sw,sw is 3 steps away (s,s,sw).
 /*
 
  */
+
+//https://stackoverflow.com/questions/2459402/hexagonal-grid-coordinates-to-pixel-coordinates for coordinate system
 var _ = d(11, func(part2 bool, input string) int {
+	r, g, b := 0, 0, 0
+	dist := func() int {
+		r2 := r
+		g2 := g
+		b2 := b
+		if r < 0 {
+			r2 = -r
+		}
+		if g < 0 {
+			g2 = -g
+		}
+		if b < 0 {
+			b2 = -b
+		}
+		return (r2 + g2 + b2) / 2
+	}
+	maxDist := 0
 	for _, step := range strings.Split(input, ",") {
 		switch step {
+		case "se":
+			r++
+			g--
+		case "ne":
+			g--
+			b++
+		case "n":
+			r--
+			b++
+		case "nw":
+			r--
+			g++
+		case "sw":
+			g++
+			b--
+		case "s":
+			r++
+			b--
 		default:
 			log.Fatal(step)
 		}
+		if dist() > maxDist {
+			maxDist = dist()
+		}
 	}
+	if part2 {
+		return maxDist
+	}
+	return dist()
 })
