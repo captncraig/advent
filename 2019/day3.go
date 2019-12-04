@@ -44,11 +44,18 @@ func d3() {
 		}
 	}
 	aPoints := map[string]bool{}
+	aTimings := map[string]int{}
+	count := 1
 	traverse(a, func(x, y int, coord string) {
 		v(coord)
 		aPoints[coord] = true
+		if aTimings[coord] == 0 {
+			aTimings[coord] = count
+		}
+		count++
 	})
 	min := 999999
+	count = 0
 	traverse(b, func(x, y int, coord string) {
 		if x < 0 {
 			x = -x
@@ -56,10 +63,15 @@ func d3() {
 		if y < 0 {
 			y = -y
 		}
+		count++
 		if aPoints[coord] {
-			v(coord, "!!!", x+y)
-			if x+y < min {
-				min = x + y
+			value := x + y
+			if *p2 {
+				value = aTimings[coord] + count
+			}
+			v(coord, "!!!", value)
+			if value < min {
+				min = value
 			}
 		}
 	})
