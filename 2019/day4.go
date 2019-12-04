@@ -1,16 +1,15 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 )
 
-var verbose = flag.Bool("v", false, "verbose mode")
+func init() {
+	days[4] = d4
+}
 
-func main() {
-	flag.Parse()
-	countA := 0
-	countB := 0
+func d4() {
+	count := 0
 	for i := 165432; i <= 707912; i++ {
 		si := fmt.Sprint(i)
 		ok := true
@@ -26,33 +25,18 @@ func main() {
 		if !ok {
 			continue
 		}
-		okA := false
-		okB := false
+		ok = false
 		for _, v := range counts {
-			if v >= 2 {
-				okA = true
-			}
-			if v == 2 {
-				okB = true
+			if v == 2 || (v >= 2 && !*p2) {
+				ok = true
 				break
 			}
 		}
-		if okA {
-			countA++
-		}
-		if okB {
-			countB++
-		}
-		if !okA && !okB {
+		if !ok {
 			continue
 		}
-		v(i, okA, okB)
+		count++
+		v(i)
 	}
-	fmt.Println(countA, countB)
-}
-
-func v(i ...interface{}) {
-	if *verbose {
-		fmt.Println(i...)
-	}
+	fmt.Println(count)
 }
