@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -59,4 +60,13 @@ func inputLinesN(n int) []string {
 		log.Fatalf("Have %d lines, expect %s", len(in), n)
 	}
 	return in
+}
+func inputCommaInts() []int {
+	parts := strings.Split(strings.TrimSpace(inputRaw()), ",")
+	out := make([]int, len(parts))
+	for i, p := range parts {
+		n, _ := strconv.Atoi(p)
+		out[i] = n
+	}
+	return out
 }
