@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 func init() {
 	days[5] = d5
 }
@@ -7,7 +9,11 @@ func init() {
 func d5() {
 	digs := inputCommaInts()
 	//v(digs)
-	prog := intProg{data: digs}
+	inp := 1
+	if *p2 {
+		inp = 5
+	}
+	prog := intProg{data: digs, input: []int{inp}}
 	//v(prog)
 	for {
 		op := prog.step()
@@ -16,4 +22,5 @@ func d5() {
 			break
 		}
 	}
+	fmt.Println(prog.output)
 }

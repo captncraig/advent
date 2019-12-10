@@ -8,8 +8,8 @@ import (
 type intProg struct {
 	data   []int
 	pc     int
-	input  []byte
-	output []byte
+	input  []int
+	output []int
 }
 
 func (i *intProg) param(rel int, op int) int {
@@ -52,13 +52,14 @@ func (i *intProg) step() int {
 	case 3: //IN
 		r := i.data[i.pc+1]
 		adv = 2
-		i.data[r] = 1 // hard coded
+		i.data[r] = i.input[0]
+		i.input = i.input[1:]
 		if *p2 {
 			i.data[r] = 5
 		}
 	case 4: //OUT
 		a1 := i.param(1, op)
-		fmt.Println(a1, "OOOOOOOOOOOOOO")
+		i.output = append(i.output, a1)
 		adv = 2
 
 	case 5: // JNZ
