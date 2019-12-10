@@ -9,6 +9,9 @@ func init() {
 func d9() {
 	digs := inputCommaInts()
 	prog := intProg{data: digs, input: []int{1}}
+	if *p2 {
+		prog.input[0] = 2
+	}
 	prog.run(false)
 	fmt.Println(prog.output)
 }
