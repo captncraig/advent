@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"sort"
 )
 
 func init() {
@@ -11,6 +12,10 @@ func init() {
 
 type point struct {
 	x, y int
+}
+
+func (p point) D(p2 point) int {
+	return int(math.Abs(float64(p2.y-p.y)) + math.Abs(float64(p2.x-p.x)))
 }
 
 func d10() {
@@ -26,24 +31,31 @@ func d10() {
 			}
 		}
 	}
-	v(asteroids)
+	//v(asteroids)
 	max := 0
-	for i, p := range asteroids {
-		uniq := map[float64]bool{}
-		for j, p2 := range asteroids {
-			if i == j {
+	var maxUniq map[float64][]point
+	for _, p := range asteroids {
+		uniq := map[float64][]point{}
+		a2 := make([]point, len(asteroids))
+		copy(a2, asteroids)
+		sort.Slice(a2, func(i, j int) bool { return a2[i].D(p) < a2[j].D(p) })
+		for _, p2 := range asteroids {
+			if p == p2 {
 				continue
 			}
 			angle := math.Atan2(float64(p2.y-p.y), float64(p2.x-p.x))
-			//v(p, p2, angle)
-			uniq[angle] = true
+			angle *= (180 / math.Pi)
+			angle += 90
+			uniq[angle] = append(uniq[angle], p2)
 		}
 		if len(uniq) > max {
 			max = len(uniq)
-			v(p, max)
+			maxUniq = uniq
+			v(p, max, uniq)
 		}
 	}
-	fmt.Println(max)
+	v(math.Pi / 2)
+	fmt.Println(max, len(maxUniq))
 }
 
 func colinear(a, b, c point) bool {
