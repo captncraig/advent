@@ -6,10 +6,11 @@ import (
 )
 
 type intProg struct {
-	data   []int
-	pc     int
-	input  []int
-	output []int
+	data         []int
+	pc           int
+	input        []int
+	output       []int
+	relativeBase int
 }
 
 func (i *intProg) copy() *intProg {
@@ -24,6 +25,22 @@ func (i *intProg) copy() *intProg {
 }
 
 func (i *intProg) param(rel int, op int) int {
+	thisMode := i.mode(rel, op)
+	i.expand(i.pc + rel)
+	actual := i.data[i.pc+rel]
+	if thisMode == "0" {
+		i.expand(actual)
+		return i.data[actual]
+	} else if thisMode == "1" {
+		return actual
+	} else if thisMode == "2" {
+		return i.data[i.relativeBase+actual]
+	}
+	log.Fatal("BAD MODE", thisMode)
+	return 0
+}
+
+func (i *intProg) mode(rel int, op int) string {
 	mode := op / 100
 	thisMode := "0"
 	if mode != 0 {
@@ -33,11 +50,17 @@ func (i *intProg) param(rel int, op int) int {
 			thisMode = string(modeStr[idx])
 		}
 	}
-	//v(thisMode, "???", rel, op)
+	return thisMode
+}
+
+func (i *intProg) rAddr(rel int, op int) int {
+	thisMode := i.mode(rel, op)
+	i.expand(i.pc + rel)
+	actual := i.data[i.pc+rel]
 	if thisMode == "0" {
-		return i.data[i.data[i.pc+rel]]
-	} else if thisMode == "1" {
-		return i.data[i.pc+rel]
+		return actual
+	} else if thisMode == "2" {
+		return i.relativeBase + actual
 	}
 	log.Fatal("BAD MODE", thisMode)
 	return 0
@@ -55,6 +78,12 @@ func (i *intProg) run(haltOnOut bool) int {
 	}
 }
 
+func (i *intProg) expand(size int) {
+	for len(i.data) < size+1 {
+		i.data = append(i.data, 0)
+	}
+}
+
 func (i *intProg) step() int {
 	//v("---", i.pc, i.data, i.input, i.output)
 	//defer v(">>>", i.pc, i.data, i.input, i.output)
@@ -65,19 +94,21 @@ func (i *intProg) step() int {
 	case 1: //+
 		a1 := i.param(1, op)
 		a2 := i.param(2, op)
-		r := i.data[i.pc+3]
+		r := i.rAddr(3, op)
+		i.expand(r)
 		i.data[r] = a1 + a2
 		adv = 4
 	case 2: //*
 		a1 := i.param(1, op)
 		a2 := i.param(2, op)
-		r := i.data[i.pc+3]
+		r := i.rAddr(3, op)
+		i.expand(r)
 		i.data[r] = a1 * a2
 		adv = 4
 	case 3: //IN
-		r := i.data[i.pc+1]
+		r := i.rAddr(1, op)
 		adv = 2
-		//v("!!!!!", i.input)
+		i.expand(r)
 		i.data[r] = i.input[0]
 		i.input = i.input[1:]
 	case 4: //OUT
@@ -110,7 +141,8 @@ func (i *intProg) step() int {
 		// it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
 		a1 := i.param(1, op)
 		a2 := i.param(2, op)
-		r := i.data[i.pc+3]
+		r := i.rAddr(3, op)
+		i.expand(r)
 		if a1 < a2 {
 			i.data[r] = 1
 		} else {
@@ -122,13 +154,19 @@ func (i *intProg) step() int {
 		// it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
 		a1 := i.param(1, op)
 		a2 := i.param(2, op)
-		r := i.data[i.pc+3]
+		r := i.rAddr(3, op)
+		i.expand(r)
 		if a1 == a2 {
 			i.data[r] = 1
 		} else {
 			i.data[r] = 0
 		}
 		adv = 4
+	case 9:
+		// adjust relative offset
+		a1 := i.param(1, op)
+		i.relativeBase += a1
+		adv = 2
 	case 99:
 		//v("HALT")
 	default:
