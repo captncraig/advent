@@ -6,8 +6,10 @@ import (
 )
 
 type intProg struct {
-	data []int
-	pc   int
+	data   []int
+	pc     int
+	input  []byte
+	output []byte
 }
 
 func (i *intProg) param(rel int, op int) int {
