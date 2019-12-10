@@ -8,16 +8,18 @@ import (
 type intProg struct {
 	data   []int
 	pc     int
-	input  <-chan int
-	output chan<- int
+	input  []int
+	output []int
 }
 
 func (i *intProg) copy() *intProg {
 	i2 := &intProg{
-		data: make([]int, len(i.data)),
-		pc:   i.pc,
+		data:  make([]int, len(i.data)),
+		pc:    i.pc,
+		input: make([]int, len(i.input)),
 	}
 	copy(i2.data, i.data)
+	copy(i2.input, i.input)
 	return i2
 }
 
@@ -31,7 +33,7 @@ func (i *intProg) param(rel int, op int) int {
 			thisMode = string(modeStr[idx])
 		}
 	}
-	v(thisMode, "???", rel, op)
+	//v(thisMode, "???", rel, op)
 	if thisMode == "0" {
 		return i.data[i.data[i.pc+rel]]
 	} else if thisMode == "1" {
@@ -41,12 +43,14 @@ func (i *intProg) param(rel int, op int) int {
 	return 0
 }
 
-func (i *intProg) run() {
+func (i *intProg) run(haltOnOut bool) int {
 	for {
 		op := i.step()
-		//v(op, prog)
+		if op == 4 && haltOnOut {
+			return op
+		}
 		if op == 99 {
-			return
+			return op
 		}
 	}
 }
@@ -54,7 +58,7 @@ func (i *intProg) run() {
 func (i *intProg) step() int {
 	op := i.data[i.pc]
 	adv := 1
-	v(op%10, "!!!", op)
+	//v(op%10, "!!!", op)
 	switch op % 100 {
 	case 1: //+
 		a1 := i.param(1, op)
@@ -71,13 +75,14 @@ func (i *intProg) step() int {
 	case 3: //IN
 		r := i.data[i.pc+1]
 		adv = 2
-		i.data[r] = <-i.input
+		i.data[r] = i.input[0]
+		i.input = i.input[1:]
 		if *p2 {
 			i.data[r] = 5
 		}
 	case 4: //OUT
 		a1 := i.param(1, op)
-		i.output <- a1
+		i.output = append(i.output, a1)
 		adv = 2
 
 	case 5: // JNZ
@@ -125,7 +130,7 @@ func (i *intProg) step() int {
 		}
 		adv = 4
 	case 99:
-		v("HALT")
+		//v("HALT")
 	default:
 		log.Fatalf("unkown opcode %d", op)
 	}

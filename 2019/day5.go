@@ -9,17 +9,18 @@ func init() {
 func d5() {
 	digs := inputCommaInts()
 	//v(digs)
-	inp := make(chan int, 1)
+	inp := 1
 	if *p2 {
-		inp <- 5
-	} else {
-		inp <- 1
+		inp = 5
 	}
-	out := make(chan int, 100)
-	prog := intProg{data: digs, input: inp, output: out}
-	prog.run()
-	close(out)
-	for o := range out {
-		fmt.Println(o)
+	prog := intProg{data: digs, input: []int{inp}}
+	//v(prog)
+	for {
+		op := prog.step()
+		//v(op, prog)
+		if op == 99 {
+			break
+		}
 	}
+	fmt.Println(prog.output)
 }
