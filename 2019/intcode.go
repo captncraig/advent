@@ -12,6 +12,17 @@ type intProg struct {
 	output []int
 }
 
+func (i *intProg) copy() *intProg {
+	i2 := &intProg{
+		data:  make([]int, len(i.data)),
+		pc:    i.pc,
+		input: make([]int, len(i.input)),
+	}
+	copy(i2.data, i.data)
+	copy(i2.input, i.input)
+	return i2
+}
+
 func (i *intProg) param(rel int, op int) int {
 	mode := op / 100
 	thisMode := "0"
@@ -30,6 +41,16 @@ func (i *intProg) param(rel int, op int) int {
 	}
 	log.Fatal("BAD MODE", thisMode)
 	return 0
+}
+
+func (i *intProg) run() {
+	for {
+		op := i.step()
+		//v(op, prog)
+		if op == 99 {
+			return
+		}
+	}
 }
 
 func (i *intProg) step() int {
