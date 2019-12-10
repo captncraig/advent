@@ -39,13 +39,16 @@ func d10() {
 		a2 := make([]point, len(asteroids))
 		copy(a2, asteroids)
 		sort.Slice(a2, func(i, j int) bool { return a2[i].D(p) < a2[j].D(p) })
-		for _, p2 := range asteroids {
+		for _, p2 := range a2 {
 			if p == p2 {
 				continue
 			}
 			angle := math.Atan2(float64(p2.y-p.y), float64(p2.x-p.x))
 			angle *= (180 / math.Pi)
 			angle += 90
+			if angle < 0 {
+				angle += 360
+			}
 			uniq[angle] = append(uniq[angle], p2)
 		}
 		if len(uniq) > max {
@@ -55,7 +58,29 @@ func d10() {
 		}
 	}
 	v(math.Pi / 2)
-	fmt.Println(max, len(maxUniq))
+	fmt.Println(max)
+	angles := []float64{}
+	for k := range maxUniq {
+		angles = append(angles, k)
+	}
+	sort.Float64s(angles)
+	v(angles)
+	n := 0
+	for {
+		for _, angle := range angles {
+			list := maxUniq[angle]
+			if len(list) > 0 {
+				//v(angle, list)
+				fmt.Println(n+1, list[0])
+				maxUniq[angle] = list[1:]
+				n++
+				if n > 199 {
+					return
+				}
+			}
+		}
+	}
+
 }
 
 func colinear(a, b, c point) bool {
