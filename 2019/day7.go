@@ -20,13 +20,24 @@ func d7() {
 	}
 	runChain := func(progs []*intProg) int {
 		out := 0
-		for i, p := range progs {
-			p.input = append(p.input, out)
-			op := p.run(*p2)
-			v(i, op, p.output)
-			out = p.output[len(p.output)-1]
+		for {
+			//v(progs[0].data, out)
+			for i, p := range progs {
+				p.input = append(p.input, out)
+				//v(i, p.input)
+				op := p.run(*p2)
+				//v(p.output)
+				out = p.output[len(p.output)-1]
+				if op != 4 {
+					//v("HHH", i)
+					if i == 4 {
+						return out
+					}
+				}
+				//v(i, p.pc, op, p.output, p.input)
+
+			}
 		}
-		return out
 	}
 	maxGain := 0
 	tryPermutation := func(p []int) {
@@ -38,12 +49,14 @@ func d7() {
 			fmt.Println(p, gain)
 		}
 	}
-	// if !*p2 {
-	// 	permute(nil, map[int]bool{}, tryPermutation, 0, 1, 2, 3, 4)
-	// } else {
-	// 	permute(nil, map[int]bool{}, tryPermutation, 5, 6, 7, 8, 9)
-	// }
-	tryPermutation([]int{4, 3, 2, 1, 0})
+	if !*p2 {
+		//tryPermutation([]int{4, 3, 2, 1, 0})
+		permute(nil, map[int]bool{}, tryPermutation, 0, 1, 2, 3, 4)
+	} else {
+		//tryPermutation([]int{9, 8, 7, 6, 5})
+		permute(nil, map[int]bool{}, tryPermutation, 5, 6, 7, 8, 9)
+	}
+
 }
 
 func permute(path []int, taken map[int]bool, f func([]int), possible ...int) {
