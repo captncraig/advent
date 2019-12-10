@@ -8,18 +8,16 @@ import (
 type intProg struct {
 	data   []int
 	pc     int
-	input  []int
-	output []int
+	input  <-chan int
+	output chan<- int
 }
 
 func (i *intProg) copy() *intProg {
 	i2 := &intProg{
-		data:  make([]int, len(i.data)),
-		pc:    i.pc,
-		input: make([]int, len(i.input)),
+		data: make([]int, len(i.data)),
+		pc:   i.pc,
 	}
 	copy(i2.data, i.data)
-	copy(i2.input, i.input)
 	return i2
 }
 
@@ -73,14 +71,13 @@ func (i *intProg) step() int {
 	case 3: //IN
 		r := i.data[i.pc+1]
 		adv = 2
-		i.data[r] = i.input[0]
-		i.input = i.input[1:]
+		i.data[r] = <-i.input
 		if *p2 {
 			i.data[r] = 5
 		}
 	case 4: //OUT
 		a1 := i.param(1, op)
-		i.output = append(i.output, a1)
+		i.output <- a1
 		adv = 2
 
 	case 5: // JNZ
